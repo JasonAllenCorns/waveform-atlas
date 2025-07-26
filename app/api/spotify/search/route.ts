@@ -10,7 +10,7 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url)
   const query = searchParams.get("q")
-  const type = searchParams.get("type") || "track"
+  const type = "track" //searchParams.get("type") || "track" //shortcut for now
   const limit = searchParams.get("limit") || "20"
   const genre = searchParams.get("genre")
   const yearFrom = searchParams.get("yearFrom")
