@@ -175,7 +175,7 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
         >
           {loading ? "Searching..." : "Search"}
         </Button>
-<h2>Filters: {showFilters ? "true" : "false"}</h2>
+
         {showFilters && (
           <div className="space-y-4" data-ref="wa.search-panel.filters.container">
             <div className="space-y-2" data-ref="wa.search-panel.tempo-slider.container">
