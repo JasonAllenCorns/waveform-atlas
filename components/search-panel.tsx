@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -29,23 +29,12 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
   const [genre, setGenre] = useState("");
   const [yearFrom, setYearFrom] = useState("");
   const [yearTo, setYearTo] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
 
-  // const typeOptions = [
-  //   { label: "Track", value: "track" },
-  //   { label: "Album", value: "album" },
-  //   { label: "Artist", value: "artist" },
-  //   { label: "Playlist", value: "playlist" },
-  //   { label: "Show", value: "show" },
-  //   { label: "Episode", value: "episode" },
-  //   { label: "Audiobook", value: "audiobook" },
-  // ];
-  // const [selectedTypes, setSelectedTypes] = useState<string[]>(["track"]);
-
-  // const handleTypeChange = (type: string) => {
-  //   setSelectedTypes((prev) =>
-  //     prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-  //   );
-  // };
+  // Update showFilters whenever searchResults changes
+  useEffect(() => {
+    setShowFilters(searchResults.length > 0);
+  }, [searchResults]);
 
   const handleSearch = async () => {
     setLoading(true);
@@ -70,7 +59,7 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
       const params = new URLSearchParams({
         q: builtQuery,
         market: "US",
-        type: "track", //selectedTypes.join(","), shortcut for now
+        type: "track",
         limit: "10",
       });
       
@@ -163,39 +152,41 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
           {loading ? "Searching..." : "Search"}
         </Button>
 
-        <div className="space-y-4" data-ref="wa.search-panel.filters.container">
-          <div className="space-y-2" data-ref="wa.search-panel.tempo-slider.container">
-            <Label className="text-brand-light">Tempo (BPM)</Label>
-            <Slider
-              value={tempoRange}
-              onValueChange={setTempoRange}
-              max={200}
-              min={60}
-              step={1}
-              className="w-full"
-            />
-            <div className="flex justify-between text-sm text-brand-light/60">
-              <span>{tempoRange[0]}</span>
-              <span>{tempoRange[1]}</span>
+        {showFilters && (
+          <div className="space-y-4" data-ref="wa.search-panel.filters.container">
+            <div className="space-y-2" data-ref="wa.search-panel.tempo-slider.container">
+              <Label className="text-brand-light">Tempo (BPM)</Label>
+              <Slider
+                value={tempoRange}
+                onValueChange={setTempoRange}
+                max={200}
+                min={60}
+                step={1}
+                className="w-full"
+              />
+              <div className="flex justify-between text-sm text-brand-light/60">
+                <span>{tempoRange[0]}</span>
+                <span>{tempoRange[1]}</span>
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-2" data-ref="wa.search-panel.energy-slider.container">
-            <Label className="text-brand-light">Energy Level</Label>
-            <Slider
-              value={energyLevel}
-              onValueChange={setEnergyLevel}
-              max={1}
-              min={0}
-              step={0.1}
-              className="w-full"
-            />
-            <div className="flex justify-between text-sm text-brand-light/60">
-              <span>Low</span>
-              <span>High</span>
+            <div className="space-y-2" data-ref="wa.search-panel.energy-slider.container">
+              <Label className="text-brand-light">Energy Level</Label>
+              <Slider
+                value={energyLevel}
+                onValueChange={setEnergyLevel}
+                max={1}
+                min={0}
+                step={0.1}
+                className="w-full"
+              />
+              <div className="flex justify-between text-sm text-brand-light/60">
+                <span>Low</span>
+                <span>High</span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="space-y-3 max-h-96 overflow-y-auto" data-ref="wa.search-panel.search-results.container">
           {error && <div className="text-red-500 text-sm" data-ref="wa.search-panel.search-results.error">{error}</div>}
