@@ -26,6 +26,7 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<Track[]>([]);
+  const [filteredSearchResults, setFilteredSearchResults] = useState<Track[]>([]);
   const [genre, setGenre] = useState("");
   const [yearFrom, setYearFrom] = useState("");
   const [yearTo, setYearTo] = useState("");
@@ -35,6 +36,29 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
   useEffect(() => {
     setShowFilters(searchResults.length > 0);
   }, [searchResults]);
+
+  // Filter search results based on tempo and energy criteria
+  useEffect(() => {
+    const filtered = searchResults.filter((track) => {
+      // Filter by tempo range if tempo data is available
+      if (track.tempo !== undefined) {
+        if (track.tempo < tempoRange[0] || track.tempo > tempoRange[1]) {
+          return false;
+        }
+      }
+      
+      // Filter by energy level if energy data is available
+      if (track.energy !== undefined) {
+        if (track.energy < energyLevel[0]) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+    
+    setFilteredSearchResults(filtered);
+  }, [searchResults, tempoRange, energyLevel]);
 
   const handleSearch = async () => {
     setLoading(true);
@@ -73,8 +97,8 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
         artist: item.artists?.map((a: any) => a.name).join(", ") ?? "",
         album: item.album?.name ?? "",
         duration_ms: item.duration_ms,
-        tempo: undefined, // Not available in search response
-        energy: undefined, // Not available in search response
+        tempo: item.audioFeatures?.tempo,
+        energy: item.audioFeatures?.energy,
         uri: item.uri,
       }));
       setSearchResults(tracks);
@@ -151,7 +175,7 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
         >
           {loading ? "Searching..." : "Search"}
         </Button>
-
+<h2>Filters: {showFilters ? "true" : "false"}</h2>
         {showFilters && (
           <div className="space-y-4" data-ref="wa.search-panel.filters.container">
             <div className="space-y-2" data-ref="wa.search-panel.tempo-slider.container">
@@ -193,8 +217,11 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
           {searchResults.length === 0 && !loading && !error && (
             <div className="text-white/60 text-center" data-ref="wa.search-panel.search-results.no-results">No results found.</div>
           )}
+          {searchResults.length > 0 && filteredSearchResults.length === 0 && !loading && !error && (
+            <div className="text-white/60 text-center" data-ref="wa.search-panel.search-results.no-filtered-results">No tracks match the current filters.</div>
+          )}
           <div data-ref="wa.search-panel.search-results.result-items" className="space-y-3 max-h-96 overflow-y-auto">
-            {searchResults.map((track) => (
+            {filteredSearchResults.map((track) => (
               <div
                 key={track.id}
                 className="flex items-center justify-between p-3 bg-brand-light/5 rounded-lg border border-brand-light/10"

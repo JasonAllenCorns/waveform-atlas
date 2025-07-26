@@ -57,6 +57,38 @@ export async function GET(request: Request) {
     }
 
     const data = await response.json()
+    
+    // If we have tracks, fetch their audio features
+    if (data.tracks?.items?.length > 0) {
+      const trackIds = data.tracks.items.map((track: any) => track.id)
+      
+      // Fetch audio features for all tracks in one request
+      const featuresResponse = await fetch(
+        `https://api.spotify.com/v1/audio-features?ids=${trackIds.join(',')}`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.accessToken}`,
+          },
+        }
+      )
+
+      if (featuresResponse.ok) {
+        const featuresData = await featuresResponse.json()
+        
+        // Create an object for O(1) lookup of audio features by track ID
+        const featuresMap = featuresData.audio_features.reduce((acc: any, feature: any) => {
+          acc[feature.id] = feature
+          return acc
+        }, {})
+        
+        // Merge audio features into track data in a single pass
+        data.tracks.items = data.tracks.items.map((track: any) => ({
+          ...track,
+          audioFeatures: featuresMap[track.id] || null
+        }))
+      }
+    }
+
     return NextResponse.json(data)
   } catch (error) {
     console.error("Error searching tracks:", error)
