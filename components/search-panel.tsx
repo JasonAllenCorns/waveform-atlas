@@ -30,22 +30,22 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
   const [yearFrom, setYearFrom] = useState("");
   const [yearTo, setYearTo] = useState("");
 
-  const typeOptions = [
-    { label: "Track", value: "track" },
-    { label: "Album", value: "album" },
-    { label: "Artist", value: "artist" },
-    { label: "Playlist", value: "playlist" },
-    { label: "Show", value: "show" },
-    { label: "Episode", value: "episode" },
-    { label: "Audiobook", value: "audiobook" },
-  ];
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(["track"]);
+  // const typeOptions = [
+  //   { label: "Track", value: "track" },
+  //   { label: "Album", value: "album" },
+  //   { label: "Artist", value: "artist" },
+  //   { label: "Playlist", value: "playlist" },
+  //   { label: "Show", value: "show" },
+  //   { label: "Episode", value: "episode" },
+  //   { label: "Audiobook", value: "audiobook" },
+  // ];
+  // const [selectedTypes, setSelectedTypes] = useState<string[]>(["track"]);
 
-  const handleTypeChange = (type: string) => {
-    setSelectedTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-    );
-  };
+  // const handleTypeChange = (type: string) => {
+  //   setSelectedTypes((prev) =>
+  //     prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+  //   );
+  // };
 
   const handleSearch = async () => {
     setLoading(true);
@@ -70,7 +70,7 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
       const params = new URLSearchParams({
         q: builtQuery,
         market: "US",
-        type: selectedTypes.join(","),
+        type: "track", //selectedTypes.join(","), shortcut for now
         limit: "10",
       });
       
@@ -106,37 +106,6 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 flex-1">
-        {/* Type filter section */}
-        <Accordion
-          type="single"
-          collapsible
-          data-ref="wa.search-panel.type-filter.container"
-        >
-          <AccordionItem value="type-filter">
-            <AccordionTrigger className="text-white">
-              Search Types
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="flex flex-wrap gap-3">
-                {typeOptions.map((opt) => (
-                  <label
-                    key={opt.value}
-                    className="flex items-center gap-2 text-white/80"
-                    data-ref={`wa.search-panel.type-filter.option.${opt.value}`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedTypes.includes(opt.value)}
-                      onChange={() => handleTypeChange(opt.value)}
-                      className="accent-green-500"
-                    />
-                    {opt.label}
-                  </label>
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
 
         {/* Search query input */}
         <div className="space-y-2" data-ref="wa.search-panel.search.input-section">
