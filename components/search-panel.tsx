@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import type { Track } from "@/app/page";
 import {
@@ -21,31 +20,30 @@ interface SearchPanelProps {
 
 export function SearchPanel({ onAddTrack }: SearchPanelProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [tempoRange, setTempoRange] = useState([60, 200]);
-  const [energyLevel, setEnergyLevel] = useState([0.5]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchResults, setSearchResults] = useState<Track[]>([]);
+  const [filteredSearchResults, setFilteredSearchResults] = useState<Track[]>([]);
   const [genre, setGenre] = useState("");
   const [yearFrom, setYearFrom] = useState("");
   const [yearTo, setYearTo] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [searchFeaturesDisabled, setSearchFeaturesDisabled] = useState(true);
+  // Update showFilters whenever searchResults changes
+  useEffect(() => {
+    setShowFilters(searchResults.length > 0);
+  }, [searchResults]);
 
-  // const typeOptions = [
-  //   { label: "Track", value: "track" },
-  //   { label: "Album", value: "album" },
-  //   { label: "Artist", value: "artist" },
-  //   { label: "Playlist", value: "playlist" },
-  //   { label: "Show", value: "show" },
-  //   { label: "Episode", value: "episode" },
-  //   { label: "Audiobook", value: "audiobook" },
-  // ];
-  // const [selectedTypes, setSelectedTypes] = useState<string[]>(["track"]);
+  // disable search button if no search query
+  useEffect(() => {
+    setSearchFeaturesDisabled(searchQuery.length === 0 && !genre && !yearFrom && !yearTo);
+  }, [searchQuery, genre, yearFrom, yearTo]);
 
-  // const handleTypeChange = (type: string) => {
-  //   setSelectedTypes((prev) =>
-  //     prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-  //   );
-  // };
+  // Filter search results based on tempo and energy criteria
+  useEffect(() => {
+    // Since audio features are no longer available, show all search results
+    setFilteredSearchResults(searchResults);
+  }, [searchResults]);
 
   const handleSearch = async () => {
     setLoading(true);
@@ -70,7 +68,7 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
       const params = new URLSearchParams({
         q: builtQuery,
         market: "US",
-        type: "track", //selectedTypes.join(","), shortcut for now
+        type: "track",
         limit: "10",
       });
       
@@ -84,8 +82,8 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
         artist: item.artists?.map((a: any) => a.name).join(", ") ?? "",
         album: item.album?.name ?? "",
         duration_ms: item.duration_ms,
-        tempo: undefined, // Not available in search response
-        energy: undefined, // Not available in search response
+        tempo: undefined, // Audio features not available due to API deprecation
+        energy: undefined, // Audio features not available due to API deprecation
         uri: item.uri,
       }));
       setSearchResults(tracks);
@@ -157,53 +155,33 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
         <Button
           onClick={handleSearch}
           className="w-full bg-green-500 hover:bg-green-600"
-          disabled={loading}
+          disabled={loading || searchFeaturesDisabled}
           data-ref="wa.search-panel.search.button"
         >
           {loading ? "Searching..." : "Search"}
         </Button>
 
-        <div className="space-y-4" data-ref="wa.search-panel.filters.container">
-          <div className="space-y-2" data-ref="wa.search-panel.tempo-slider.container">
-            <Label className="text-brand-light">Tempo (BPM)</Label>
-            <Slider
-              value={tempoRange}
-              onValueChange={setTempoRange}
-              max={200}
-              min={60}
-              step={1}
-              className="w-full"
-            />
-            <div className="flex justify-between text-sm text-brand-light/60">
-              <span>{tempoRange[0]}</span>
-              <span>{tempoRange[1]}</span>
+        {showFilters && (
+          <div className="space-y-4" data-ref="wa.search-panel.filters.container">
+            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <p className="text-red-400 text-sm">
+                ⚠️ Audio features filtering is no longer available. Spotify has deprecated their audio analysis endpoints. 
+                We're exploring alternative solutions for advanced filtering.
+              </p>
             </div>
           </div>
-
-          <div className="space-y-2" data-ref="wa.search-panel.energy-slider.container">
-            <Label className="text-brand-light">Energy Level</Label>
-            <Slider
-              value={energyLevel}
-              onValueChange={setEnergyLevel}
-              max={1}
-              min={0}
-              step={0.1}
-              className="w-full"
-            />
-            <div className="flex justify-between text-sm text-brand-light/60">
-              <span>Low</span>
-              <span>High</span>
-            </div>
-          </div>
-        </div>
+        )}
 
         <div className="space-y-3 max-h-96 overflow-y-auto" data-ref="wa.search-panel.search-results.container">
           {error && <div className="text-red-500 text-sm" data-ref="wa.search-panel.search-results.error">{error}</div>}
-          {searchResults.length === 0 && !loading && !error && (
+          {!searchFeaturesDisabled && searchResults.length === 0 && !loading && !error && (
             <div className="text-white/60 text-center" data-ref="wa.search-panel.search-results.no-results">No results found.</div>
           )}
+          {!searchFeaturesDisabled && searchResults.length > 0 && filteredSearchResults.length === 0 && !loading && !error && (
+            <div className="text-white/60 text-center" data-ref="wa.search-panel.search-results.no-filtered-results">No tracks match the current filters.</div>
+          )}
           <div data-ref="wa.search-panel.search-results.result-items" className="space-y-3 max-h-96 overflow-y-auto">
-            {searchResults.map((track) => (
+            {filteredSearchResults.map((track) => (
               <div
                 key={track.id}
                 className="flex items-center justify-between p-3 bg-brand-light/5 rounded-lg border border-brand-light/10"
