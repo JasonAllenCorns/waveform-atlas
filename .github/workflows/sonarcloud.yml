@@ -31,11 +31,3 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=JasonAllenCorns_waveform-atlas
-            -Dsonar.organization=ji8jolij-asase3
-            -Dsonar.sources=app,components,hooks,lib
-            -Dsonar.tests=test
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info # Adjust if your coverage report path differs
-            -Dsonar.test.inclusions=**/*.test.js,**/*.spec.js # Adjust based on your test file naming convention
