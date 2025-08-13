@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
 
 type TrackResult = {
   title: string;
@@ -21,50 +22,7 @@ type TrackResult = {
   duration?: number;
 };
 
-type SpotifyTrack = {
-  id: string;
-  name: string;
-  artists: Array<{ name: string }>;
-  album: SpotifyAlbum;
-  duration_ms: number;
-  external_urls: { spotify: string };
-  preview_url?: string;
-  uri: string;
-  popularity: number;
-  images?: Array<{ url: string }>;
-};
-
-type SpotifyAlbum = {
-  name: string;
-  artists: Array<{ name: string }>;
-  album_type: string;
-  available_markets: Array<string>;
-  external_urls: { spotify: string };
-  href: string;
-  id: string;
-  images: Array<{ url: string }>;
-  is_playable: boolean;
-  release_date: string;
-  release_date_precision: string;
-  total_tracks: number;
-  type: string;
-  uri: string;
-};
-
-type SpotifyArtist = {
-  external_urls: { spotify: string };
-  href: string;
-  id: string;
-  name: string;
-  type: string;
-  uri: string;
-};
-
-type SpotifyImage = {
-  url: string;
-  height: number;
-  width: number;
-};
+import { SpotifyTrack } from "@/types/track"
 
 type TrackSearchRequest = {
   targetBPM: number;
@@ -143,7 +101,7 @@ export default function TrackChatPanel({ onAddTrack }: TrackChatPanelProps) {
       const data = await res.json();
 
       let gptTracks: TrackResult[] = [];
-      
+
       if (data.content && Array.isArray(data.content)) {
         gptTracks = data.content;
       } else if (data.error) {
@@ -165,7 +123,7 @@ export default function TrackChatPanel({ onAddTrack }: TrackChatPanelProps) {
 
   const searchSpotifyForTrack = async (track: TrackResult) => {
     const trackKey = `${track.title}-${track.artist}`;
-    
+
     if (spotifyResults[trackKey]) {
       // Toggle expansion if already searched
       setExpandedTracks(prev => {
@@ -181,28 +139,23 @@ export default function TrackChatPanel({ onAddTrack }: TrackChatPanelProps) {
     }
 
     setSearchingTracks(prev => new Set(prev).add(trackKey));
-    
+
     try {
       const searchQuery = `${track.title} ${track.artist}`;
       const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(searchQuery)}&limit=5`);
-      
+
       if (!res.ok) {
         throw new Error(`Search failed: ${res.status}`);
       }
-      
+
       const data = await res.json();
       const spotifyTracks = data.tracks?.items || [];
-      
-      console.log('(jason.corns) --------------------------------------- start group: spotifyTracks');
-      console.log('(jason.corns) logged details from ~/Sites/waveform-atlas/components/track-chat-panel.tsx');
-      console.log("(jason.corns) spotifyTracks", spotifyTracks);
-      console.log('(jason.corns) ----------------------------------------- end group: spotifyTracks');
 
       setSpotifyResults(prev => ({
         ...prev,
         [trackKey]: spotifyTracks
       }));
-      
+
       setExpandedTracks(prev => new Set(prev).add(trackKey));
     } catch (error) {
       console.error("Spotify search failed:", error);
@@ -396,7 +349,7 @@ export default function TrackChatPanel({ onAddTrack }: TrackChatPanelProps) {
               const isExpanded = expandedTracks.has(trackKey);
               const isSearching = searchingTracks.has(trackKey);
               const spotifyMatches = spotifyResults[trackKey] || [];
-              
+
               return (
                 <div
                   key={idx}
@@ -404,7 +357,7 @@ export default function TrackChatPanel({ onAddTrack }: TrackChatPanelProps) {
                   data-ref={`wa.track-chat-panel.results.result-item.${idx}`}
                 >
                   {/* Track Header */}
-                  <div 
+                  <div
                     className="flex items-center justify-between p-3 cursor-pointer hover:bg-white/5"
                     onClick={() => searchSpotifyForTrack(track)}
                   >
@@ -437,15 +390,17 @@ export default function TrackChatPanel({ onAddTrack }: TrackChatPanelProps) {
                         Found {spotifyMatches.length} Spotify matches:
                       </div>
                       <div className="space-y-1 pb-3">
-                        {spotifyMatches.map((spotifyTrack, matchIdx) => (
+                        {spotifyMatches.map((spotifyTrack) => (
                           <div
                             key={spotifyTrack.id}
                             className="flex items-center justify-between px-3 py-2 hover:bg-white/5"
                           >
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                               {spotifyTrack.images?.[0]?.url ? (
-                                <img 
-                                  src={spotifyTrack.images[0].url} 
+                                <Image
+                                  width={32}
+                                  height={32}
+                                  src={spotifyTrack.images[0].url}
                                   alt="Album cover"
                                   className="w-8 h-8 rounded"
                                 />

@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Play, ExternalLink, Music2 } from "lucide-react"
-import type { Track } from "@/app/page"
+import { Play, ExternalLink } from "lucide-react"
+import type { Track } from "@/types/track"
 
 interface SpotifyMatch {
   id: string
@@ -66,26 +66,26 @@ export function TrackSelectionModal({
       <DialogContent className="max-w-2xl max-h-[80vh] bg-white/95 backdrop-blur-sm border-white/20">
         <DialogHeader>
           <DialogTitle className="text-gray-900">
-            Select Spotify Match for "{track.name}" by {track.artist}
+            Select Spotify Match for &quot;{track.name}&quot; by {track.artist}
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <div className="text-sm text-gray-600">
             Found {matches.length} potential matches on Spotify. Select the best match or skip if none are correct.
           </div>
-          
+
           <ScrollArea className="h-[400px] pr-4">
             <div className="space-y-3">
               {matches.slice(0, 10).map((match, index) => {
                 // Determine if this is the best match based on name similarity and popularity
-                const isBestMatch = index === 0 || 
-                  (match.name.toLowerCase().includes(track.name.toLowerCase()) && 
+                const isBestMatch = index === 0 ||
+                  (match.name.toLowerCase().includes(track.name.toLowerCase()) &&
                    match.artist.toLowerCase().includes(track.artist.toLowerCase()));
-                
+
                 return (
-                  <Card 
-                    key={match.id} 
+                  <Card
+                    key={match.id}
                     className="hover:bg-gray-50 transition-colors cursor-pointer border-gray-200"
                     onClick={() => handleSelectMatch(match)}
                   >
@@ -102,17 +102,17 @@ export function TrackSelectionModal({
                               </Badge>
                             )}
                           </div>
-                          
+
                           <div className="text-sm text-gray-600 mb-2">
                             {match.artist} • {match.album}
                           </div>
-                          
+
                           <div className="flex items-center gap-4 text-xs text-gray-500">
                             <span>{formatDuration(match.duration_ms)}</span>
                             <span>Popularity: {match.popularity}/100</span>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-2 ml-4">
                           {match.previewUrl && (
                             <Button
@@ -127,7 +127,7 @@ export function TrackSelectionModal({
                               <Play className="h-4 w-4" />
                             </Button>
                           )}
-                          
+
                           <Button
                             size="sm"
                             variant="ghost"
@@ -147,7 +147,7 @@ export function TrackSelectionModal({
               })}
             </div>
           </ScrollArea>
-          
+
           <div className="flex justify-between pt-4 border-t border-gray-200">
             <Button variant="outline" onClick={onSkip}>
               Skip - No Match Found
@@ -160,4 +160,4 @@ export function TrackSelectionModal({
       </DialogContent>
     </Dialog>
   )
-} 
+}

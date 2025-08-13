@@ -10,51 +10,10 @@ import { DndContext, type DragEndEvent, DragOverlay, type DragStartEvent } from 
 import { TrackCard } from "@/components/track-card"
 import { LandingPage } from "@/components/landing-page"
 import { LoadingSpinner } from "@/components/loading-spinner"
-
-export interface Track {
-  id: string
-  name: string
-  artist: string
-  album?: string
-  duration_ms: number
-  tempo?: number
-  energy?: number
-  preview_url?: string
-  uri: string
-  // GPT track fields
-  notes?: string
-  spotifyUrl?: string
-  spotifyId?: string
-  genre?: string
-  mood?: string
-  allowVocals?: boolean
-  energyRange?: string
-  genrePreference?: string
-  spotifyImage?: string
-  spotifyPopularity?: number
-  spotifyAlbum?: string
-  // Validation fields
-  validated?: boolean
-  spotifyMatch?: {
-    id: string
-    uri: string
-    externalUrl: string
-    previewUrl?: string
-  }
-  spotifyMatches?: Array<{
-    id: string
-    uri: string
-    externalUrl: string
-    previewUrl?: string
-    name: string
-    artist: string
-    album: string
-    duration_ms: number
-    popularity: number
-  }>
-  validationError?: string
-  showMatchSelection?: boolean
-}
+import { Track, SpotifyTrack, SpotifyMatch } from "@/types/track"
+import { addTrackToPlaylist, removeTrackFromPlaylist, reorderPlaylist as reorderPlaylistUtil, findTrackById, getUnvalidatedTracks } from "@/lib/playlist"
+import { validateTrack as validateTrackUtil, updateTrackWithExactMatch, updateTrackWithMultipleMatches, updateTrackWithSelectedMatch, updateTrackWithSkippedMatch, updateTrackWithValidationError } from "@/lib/validation"
+import { mapSpotifyTrackToTrack } from "@/lib/mappers"
 
 export default function Home() {
   const [playlist, setPlaylist] = useState<Track[]>([])
@@ -70,174 +29,41 @@ export default function Home() {
     return <LandingPage />
   }
 
-  const addToPlaylist = (track: Track) => {
-    setPlaylist((prev) => [...prev, { ...track, id: `${track.id}-${Date.now()}` }])
-  }
-
-  const addGptTrackToPlaylist = (spotifyTrack: any) => {
-    console.log('Adding Spotify track:', spotifyTrack);
-    
-    const track: Track = {
-      id: spotifyTrack.id,
-      name: spotifyTrack.name,
-      artist: spotifyTrack.artists?.[0]?.name || spotifyTrack.artist || 'Unknown Artist',
-      album: spotifyTrack.album?.name || spotifyTrack.album || 'Unknown Album',
-      duration_ms: spotifyTrack.duration_ms,
-      tempo: undefined, // Will be filled by Spotify API if available
-      energy: undefined, // Will be filled by Spotify API if available
-      preview_url: spotifyTrack.preview_url,
-      uri: spotifyTrack.uri,
-      // GPT fields (if available)
-      notes: spotifyTrack.notes,
-      spotifyUrl: spotifyTrack.external_urls?.spotify,
-      spotifyId: spotifyTrack.id,
-      genre: spotifyTrack.genre,
-      mood: spotifyTrack.mood,
-      allowVocals: spotifyTrack.allowVocals,
-      energyRange: spotifyTrack.energyRange,
-      genrePreference: spotifyTrack.genrePreference,
-      spotifyImage: spotifyTrack.images?.[0]?.url,
-      spotifyPopularity: spotifyTrack.popularity,
-      spotifyAlbum: spotifyTrack.album?.name || spotifyTrack.album || 'Unknown Album',
-      // Validation fields
-      validated: true, // Already validated since it came from Spotify
-    }
-    
-    console.log('Processed track:', track);
-    setPlaylist((prev) => [...prev, track])
+  const addGptTrackToPlaylist = (spotifyTrack: SpotifyTrack) => {
+    const track = mapSpotifyTrackToTrack(spotifyTrack)
+    setPlaylist((prev) => addTrackToPlaylist(prev, track))
   }
 
   const validateTrack = async (track: Track) => {
     if (!track.validated && !track.validationError) {
-      try {
-        const searchQuery = `${track.name} ${track.artist}`;
-        const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(searchQuery)}&limit=10`);
-        
-        if (!res.ok) {
-          throw new Error(`Search failed: ${res.status}`);
-        }
-        
-        const data = await res.json();
-        const spotifyTracks = data.tracks?.items || [];
-        
-        if (spotifyTracks.length === 0) {
-          // No matches found
-          setPlaylist(prev => prev.map(t => 
-            t.id === track.id 
-              ? {
-                  ...t,
-                  validated: false,
-                  validationError: "No matches found on Spotify",
-                }
-              : t
-          ));
-          return;
-        }
-        
-        // Find exact match
-        const exactMatch = spotifyTracks.find((spotifyTrack: any) => 
-          spotifyTrack.name.toLowerCase() === track.name.toLowerCase() &&
-          spotifyTrack.artists.some((artist: any) => 
-            artist.name.toLowerCase() === track.artist.toLowerCase()
-          )
-        );
-        
-        if (exactMatch) {
-          // Exact match found - auto-validate
-          setPlaylist(prev => prev.map(t => 
-            t.id === track.id 
-              ? {
-                  ...t,
-                  validated: true,
-                  spotifyMatch: {
-                    id: exactMatch.id,
-                    uri: exactMatch.uri,
-                    externalUrl: exactMatch.external_urls.spotify,
-                    previewUrl: exactMatch.preview_url,
-                  },
-                  validationError: undefined,
-                }
-              : t
-          ));
-        } else {
-          // Multiple matches found - show selection modal
-          const matches = spotifyTracks.map((spotifyTrack: any) => ({
-            id: spotifyTrack.id,
-            uri: spotifyTrack.uri,
-            externalUrl: spotifyTrack.external_urls.spotify,
-            previewUrl: spotifyTrack.preview_url,
-            name: spotifyTrack.name,
-            artist: spotifyTrack.artists.map((a: any) => a.name).join(', '),
-            album: spotifyTrack.album.name,
-            duration_ms: spotifyTrack.duration_ms,
-            popularity: spotifyTrack.popularity,
-          }));
-          
-          setPlaylist(prev => prev.map(t => 
-            t.id === track.id 
-              ? {
-                  ...t,
-                  spotifyMatches: matches,
-                  showMatchSelection: true,
-                  validationError: undefined,
-                }
-              : t
-          ));
-        }
-      } catch (error) {
-        console.error("Validation failed:", error);
-        setPlaylist(prev => prev.map(t => 
-          t.id === track.id 
-            ? {
-                ...t,
-                validated: false,
-                validationError: "Validation failed",
-              }
-            : t
-        ));
+      const result = await validateTrackUtil(track);
+
+      if (!result.success) {
+        setPlaylist(prev => updateTrackWithValidationError(prev, track.id, result.error || "Validation failed"));
+        return;
+      }
+
+      if (result.exactMatch) {
+        setPlaylist(prev => updateTrackWithExactMatch(prev, track.id, result.exactMatch));
+      } else if (result.matches && result.matches.length > 0) {
+        setPlaylist(prev => updateTrackWithMultipleMatches(prev, track.id, result.matches));
       }
     }
   };
 
-  const handleMatchSelection = (trackId: string, selectedMatch: any) => {
-    setPlaylist(prev => prev.map(t => 
-      t.id === trackId 
-        ? {
-            ...t,
-            validated: true,
-            spotifyMatch: {
-              id: selectedMatch.id,
-              uri: selectedMatch.uri,
-              externalUrl: selectedMatch.externalUrl,
-              previewUrl: selectedMatch.previewUrl,
-            },
-            spotifyMatches: undefined,
-            showMatchSelection: false,
-            validationError: undefined,
-          }
-        : t
-    ));
+  const handleMatchSelection = (trackId: string, selectedMatch: SpotifyMatch) => {
+    setPlaylist(prev => updateTrackWithSelectedMatch(prev, trackId, selectedMatch));
   };
 
   const handleSkipMatchSelection = (trackId: string) => {
-    setPlaylist(prev => prev.map(t => 
-      t.id === trackId 
-        ? {
-            ...t,
-            validated: false,
-            validationError: "No match selected",
-            spotifyMatches: undefined,
-            showMatchSelection: false,
-          }
-        : t
-    ));
+    setPlaylist(prev => updateTrackWithSkippedMatch(prev, trackId));
   };
 
   const validateAllTracks = async () => {
-    const unvalidatedTracks = playlist.filter(track => !track.validated && !track.validationError);
-    
+    const unvalidatedTracks = getUnvalidatedTracks(playlist);
+
     if (unvalidatedTracks.length === 0) return;
-    
+
     // For batch validation, we'll validate tracks individually to handle multiple matches properly
     for (const track of unvalidatedTracks) {
       await validateTrack(track);
@@ -245,26 +71,15 @@ export default function Home() {
   };
 
   const removeFromPlaylist = (trackId: string) => {
-    setPlaylist((prev) => prev.filter((track) => track.id !== trackId))
+    setPlaylist((prev) => removeTrackFromPlaylist(prev, trackId))
   }
 
   const reorderPlaylist = (activeId: string, overId: string) => {
-    setPlaylist((prev) => {
-      const activeIndex = prev.findIndex((track) => track.id === activeId)
-      const overIndex = prev.findIndex((track) => track.id === overId)
-
-      if (activeIndex === -1 || overIndex === -1) return prev
-
-      const newPlaylist = [...prev]
-      const [removed] = newPlaylist.splice(activeIndex, 1)
-      newPlaylist.splice(overIndex, 0, removed)
-
-      return newPlaylist
-    })
+    setPlaylist((prev) => reorderPlaylistUtil(prev, activeId, overId))
   }
 
   const handleDragStart = (event: DragStartEvent) => {
-    const track = playlist.find((t) => t.id === event.active.id)
+    const track = findTrackById(playlist, event.active.id as string)
     setActiveTrack(track || null)
   }
 

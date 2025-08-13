@@ -53,6 +53,7 @@ ${seedByTrackOnly ? `Recommend songs similar to "${input.seedTrack}."` : ''}
 ${seedByArtistOnly ? `Recommend songs by "${input.seedArtist}."` : ''}
 ${seedByAlbumOnly ? `Recommend songs from the album "${input.seedAlbum}."` : ''}
 ${seedByAll ? `Recommend songs similar to "${input.seedTrack}" by "${input.seedArtist}" from the album "${input.seedAlbum}."` : ''}
+${seedByNone ? 'Recommend songs based on the above criteria.' : ''}
 ${input.genrePreference ? `Favor the ${input.genrePreference} genre.` : ''}
 Respond in properly formatted JSON only. Do not include any other text or code geate characters.
 `;

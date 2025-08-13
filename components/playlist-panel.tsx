@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { Track } from "@/app/page"
+import type { SpotifyMatch, Track } from "@/types/track"
 import { TrackCard } from "@/components/track-card"
 import { TrackSelectionModal } from "@/components/track-selection-modal"
 import { useDroppable } from "@dnd-kit/core"
@@ -19,7 +19,7 @@ interface PlaylistPanelProps {
   onRemoveTrack: (trackId: string) => void
   onValidateTrack: (track: Track) => Promise<void>
   onValidateAllTracks: () => Promise<void>
-  onMatchSelection: (trackId: string, selectedMatch: any) => void
+  onMatchSelection: (trackId: string, selectedMatch: SpotifyMatch) => void
   onSkipMatchSelection: (trackId: string) => void
 }
 
