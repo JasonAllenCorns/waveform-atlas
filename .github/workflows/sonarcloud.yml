@@ -20,12 +20,13 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          projectKey: JasonAllenCorns_waveform-atlas
-          organization: ji8jolij-asase3
-          projectName: waveform-atlas
-          projectVersion: 1.0
-          sources: .
-          tests: .
-          testInclusions: '**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/*.spec.tsx'
-          lcovReportPaths: coverage/lcov.info
-          sourceEncoding: UTF-8
+          args: >
+            -Dsonar.projectKey=JasonAllenCorns_waveform-atlas
+            -Dsonar.organization=ji8jolij-asase3
+            -Dsonar.projectName=waveform-atlas
+            -Dsonar.projectVersion=1.0
+            -Dsonar.sources=.
+            -Dsonar.tests=.
+            -Dsonar.testInclusions='**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/*.spec.tsx'
+            -Dsonar.lcovReportPaths=coverage/lcov.info
+            -Dsonar.sourceEncoding=UTF-8
