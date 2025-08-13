@@ -32,9 +32,9 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          projectKey: JasonAllenCorns_waveform-atlas
-          organization: ji8jolij-asase3
           args: >
+            -DprojectKey=JasonAllenCorns_waveform-atlas
+            -Dorganization=ji8jolij-asase3
             -Dsonar.sources=app,components,hooks,lib
             -Dsonar.tests=test
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info # Adjust if your coverage report path differs
