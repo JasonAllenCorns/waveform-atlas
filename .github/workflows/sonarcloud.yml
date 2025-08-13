@@ -28,5 +28,5 @@ jobs:
             -Dsonar.sources=app,components,hooks,lib
             -Dsonar.tests=.
             -Dsonar.test.inclusions=**/__tests__/**/*.test.ts,**/__tests__/**/*.test.tsx
-            -Dsonar.lcovReportPaths=coverage/lcov.info
+            -Dsonar.reportPaths=coverage/lcov.info
             -Dsonar.sourceEncoding=UTF-8
