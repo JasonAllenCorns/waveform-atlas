@@ -86,7 +86,9 @@ export function LandingPage() {
         {/* Preview Image */}
         <div className="text-center">
           <div className="inline-block p-4 bg-brand-light/5 rounded-2xl border border-brand-light/10 backdrop-blur-sm">
-            <img
+            <Image
+              width={800}
+              height={450}
               src="/design-mockup.png"
               alt="Waveform Atlas Interface Preview"
               className="rounded-lg max-w-full h-auto"

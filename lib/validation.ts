@@ -1,4 +1,4 @@
-import { Track, SpotifyMatch } from "@/types/track"
+import { Track, SpotifyMatch, SpotifyTrack } from "@/types/track"
 
 /**
  * Creates a search query from track name and artist
@@ -10,11 +10,11 @@ export function createSearchQuery(track: Track): string {
 /**
  * Finds an exact match between a track and Spotify search results
  */
-export function findExactMatch(track: Track, spotifyTracks: any[]): any | null {
-  return spotifyTracks.find((spotifyTrack: any) => 
-    spotifyTrack.name.toLowerCase() === track.name.toLowerCase() &&
-    spotifyTrack.artists.some((artist: any) => 
-      artist.name.toLowerCase() === track.artist.toLowerCase()
+export function findExactMatch(track: Track, spotifyTracks: SpotifyTrack[]): SpotifyTrack | null {
+  return spotifyTracks.find((spotifyTrack: SpotifyTrack) => 
+    spotifyTrack.name.toLowerCase() === track?.name?.toLowerCase() &&
+    spotifyTrack.artists.some(artist => 
+      artist?.name?.toLowerCase() === track?.artist?.toLowerCase()
     )
   ) || null
 }
@@ -22,14 +22,14 @@ export function findExactMatch(track: Track, spotifyTracks: any[]): any | null {
 /**
  * Maps Spotify API response to our SpotifyMatch format
  */
-export function mapSpotifyTracksToMatches(spotifyTracks: any[]): SpotifyMatch[] {
-  return spotifyTracks.map((spotifyTrack: any) => ({
+export function mapSpotifyTracksToMatches(spotifyTracks: SpotifyTrack[]): SpotifyMatch[] {
+  return spotifyTracks.map((spotifyTrack: SpotifyTrack) => ({
     id: spotifyTrack.id,
     uri: spotifyTrack.uri,
     externalUrl: spotifyTrack.external_urls.spotify,
     previewUrl: spotifyTrack.preview_url,
     name: spotifyTrack.name,
-    artist: spotifyTrack.artists.map((a: any) => a.name).join(', '),
+    artist: spotifyTrack.artists.map((a) => a.name).join(', '),
     album: spotifyTrack.album.name,
     duration_ms: spotifyTrack.duration_ms,
     popularity: spotifyTrack.popularity,
@@ -54,7 +54,7 @@ export function updateTrackWithValidationError(playlist: Track[], trackId: strin
 /**
  * Updates a track with exact match validation
  */
-export function updateTrackWithExactMatch(playlist: Track[], trackId: string, exactMatch: any): Track[] {
+export function updateTrackWithExactMatch(playlist: Track[], trackId: string, exactMatch: SpotifyTrack): Track[] {
   return playlist.map(t => 
     t.id === trackId 
       ? {
@@ -132,7 +132,7 @@ export function updateTrackWithSkippedMatch(playlist: Track[], trackId: string):
  * Validates a single track against Spotify API
  */
 export async function validateTrack(track: Track): Promise<
-  | { success: true; exactMatch: any; matches?: never; error?: never }
+  | { success: true; exactMatch: SpotifyTrack; matches?: never; error?: never }
   | { success: true; exactMatch?: never; matches: SpotifyMatch[]; error?: never }
   | { success: false; exactMatch?: never; matches?: never; error: string }
 > {

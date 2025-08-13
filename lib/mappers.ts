@@ -1,15 +1,15 @@
-import { Track } from "@/types/track"
+import { Track, SpotifyTrack } from "@/types/track"
 
 /**
  * Maps a Spotify track object to our Track interface
  * Used when adding tracks from GPT responses or Spotify API
  */
-export function mapSpotifyTrackToTrack(spotifyTrack: any): Track {
+export function mapSpotifyTrackToTrack(spotifyTrack: SpotifyTrack): Track {
   return {
     id: spotifyTrack.id,
     name: spotifyTrack.name,
-    artist: spotifyTrack.artists?.[0]?.name || spotifyTrack.artist || 'Unknown Artist',
-    album: spotifyTrack.album?.name || spotifyTrack.album || 'Unknown Album',
+    artist: spotifyTrack.artists?.[0]?.name || 'Unknown Artist',
+    album: spotifyTrack.album?.name || 'Unknown Album',
     duration_ms: spotifyTrack.duration_ms,
     tempo: undefined, // Will be filled by Spotify API if available
     energy: undefined, // Will be filled by Spotify API if available
@@ -26,7 +26,7 @@ export function mapSpotifyTrackToTrack(spotifyTrack: any): Track {
     genrePreference: spotifyTrack.genrePreference,
     spotifyImage: spotifyTrack.images?.[0]?.url,
     spotifyPopularity: spotifyTrack.popularity,
-    spotifyAlbum: spotifyTrack.album?.name || spotifyTrack.album || 'Unknown Album',
+          spotifyAlbum: spotifyTrack.album?.name || 'Unknown Album',
     // Validation fields
     validated: true, // Already validated since it came from Spotify
   }
@@ -79,12 +79,9 @@ export function createUniqueTrackId(trackId: string): string {
 /**
  * Safely extracts artist name from Spotify track
  */
-export function extractArtistName(spotifyTrack: any): string {
+export function extractArtistName(spotifyTrack: SpotifyTrack): string {
   if (spotifyTrack.artists && spotifyTrack.artists.length > 0) {
     return spotifyTrack.artists[0].name
-  }
-  if (spotifyTrack.artist) {
-    return spotifyTrack.artist
   }
   return 'Unknown Artist'
 }
@@ -92,12 +89,9 @@ export function extractArtistName(spotifyTrack: any): string {
 /**
  * Safely extracts album name from Spotify track
  */
-export function extractAlbumName(spotifyTrack: any): string {
+export function extractAlbumName(spotifyTrack: SpotifyTrack): string {
   if (spotifyTrack.album?.name) {
     return spotifyTrack.album.name
-  }
-  if (spotifyTrack.album) {
-    return spotifyTrack.album
   }
   return 'Unknown Album'
 }
@@ -105,6 +99,6 @@ export function extractAlbumName(spotifyTrack: any): string {
 /**
  * Safely extracts image URL from Spotify track
  */
-export function extractImageUrl(spotifyTrack: any): string | undefined {
+export function extractImageUrl(spotifyTrack: SpotifyTrack): string | undefined {
   return spotifyTrack.images?.[0]?.url
 } 

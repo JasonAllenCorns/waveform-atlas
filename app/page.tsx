@@ -10,7 +10,7 @@ import { DndContext, type DragEndEvent, DragOverlay, type DragStartEvent } from 
 import { TrackCard } from "@/components/track-card"
 import { LandingPage } from "@/components/landing-page"
 import { LoadingSpinner } from "@/components/loading-spinner"
-import { Track } from "@/types/track"
+import { Track, SpotifyTrack, SpotifyMatch } from "@/types/track"
 import { addTrackToPlaylist, removeTrackFromPlaylist, reorderPlaylist as reorderPlaylistUtil, findTrackById, getUnvalidatedTracks } from "@/lib/playlist"
 import { validateTrack as validateTrackUtil, updateTrackWithExactMatch, updateTrackWithMultipleMatches, updateTrackWithSelectedMatch, updateTrackWithSkippedMatch, updateTrackWithValidationError } from "@/lib/validation"
 import { mapSpotifyTrackToTrack } from "@/lib/mappers"
@@ -29,11 +29,7 @@ export default function Home() {
     return <LandingPage />
   }
 
-  const addToPlaylist = (track: Track) => {
-    setPlaylist((prev) => addTrackToPlaylist(prev, track))
-  }
-
-  const addGptTrackToPlaylist = (spotifyTrack: any) => {    
+  const addGptTrackToPlaylist = (spotifyTrack: SpotifyTrack) => {
     const track = mapSpotifyTrackToTrack(spotifyTrack)
     setPlaylist((prev) => addTrackToPlaylist(prev, track))
   }
@@ -41,12 +37,12 @@ export default function Home() {
   const validateTrack = async (track: Track) => {
     if (!track.validated && !track.validationError) {
       const result = await validateTrackUtil(track);
-      
+
       if (!result.success) {
         setPlaylist(prev => updateTrackWithValidationError(prev, track.id, result.error || "Validation failed"));
         return;
       }
-      
+
       if (result.exactMatch) {
         setPlaylist(prev => updateTrackWithExactMatch(prev, track.id, result.exactMatch));
       } else if (result.matches && result.matches.length > 0) {
@@ -55,7 +51,7 @@ export default function Home() {
     }
   };
 
-  const handleMatchSelection = (trackId: string, selectedMatch: any) => {
+  const handleMatchSelection = (trackId: string, selectedMatch: SpotifyMatch) => {
     setPlaylist(prev => updateTrackWithSelectedMatch(prev, trackId, selectedMatch));
   };
 
@@ -65,9 +61,9 @@ export default function Home() {
 
   const validateAllTracks = async () => {
     const unvalidatedTracks = getUnvalidatedTracks(playlist);
-    
+
     if (unvalidatedTracks.length === 0) return;
-    
+
     // For batch validation, we'll validate tracks individually to handle multiple matches properly
     for (const track of unvalidatedTracks) {
       await validateTrack(track);

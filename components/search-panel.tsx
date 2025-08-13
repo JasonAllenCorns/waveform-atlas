@@ -6,13 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import type { Track } from "@/app/page";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import type { SpotifyTrack, Track } from "@/types/track";
 
 interface SearchPanelProps {
   onAddTrack: (track: Track) => void;
@@ -55,7 +49,7 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
       if (genre) {
         builtQuery += ` genre:${genre}`;
       }
-      
+
       // Add year range filter if provided
       if (yearFrom && yearTo) {
         builtQuery += ` year:${yearFrom}-${yearTo}`;
@@ -71,15 +65,15 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
         type: "track",
         limit: "10",
       });
-      
+
       const res = await fetch(`/api/spotify/search?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to fetch search results");
       const data = await res.json();
       // Map Spotify API response to Track[]
-      const tracks: Track[] = (data.tracks?.items || []).map((item: any) => ({
+      const tracks: Track[] = (data.tracks?.items || []).map((item: SpotifyTrack) => ({
         id: item.id,
         name: item.name,
-        artist: item.artists?.map((a: any) => a.name).join(", ") ?? "",
+        artist: item.artists?.map(a => a.name).join(", ") ?? "",
         album: item.album?.name ?? "",
         duration_ms: item.duration_ms,
         tempo: undefined, // Audio features not available due to API deprecation
@@ -87,8 +81,9 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
         uri: item.uri,
       }));
       setSearchResults(tracks);
-    } catch (err: any) {
-      setError(err.message || "Unknown error");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      setError(errorMessage);
       setSearchResults([]);
     } finally {
       setLoading(false);
@@ -129,7 +124,7 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
             data-ref="wa.search-panel.genre-filter.input"
           />
         </div>
-        
+
         {/* Year range filter */}
         <div className="space-y-2" data-ref="wa.search-panel.year-filter.container">
           <Label className="text-brand-light">Year Range</Label>
@@ -165,8 +160,8 @@ export function SearchPanel({ onAddTrack }: SearchPanelProps) {
           <div className="space-y-4" data-ref="wa.search-panel.filters.container">
             <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
               <p className="text-red-400 text-sm">
-                ⚠️ Audio features filtering is no longer available. Spotify has deprecated their audio analysis endpoints. 
-                We're exploring alternative solutions for advanced filtering.
+                ⚠️ Audio features filtering is no longer available. Spotify has deprecated their audio analysis endpoints.
+                We&apos;re exploring alternative solutions for advanced filtering.
               </p>
             </div>
           </div>

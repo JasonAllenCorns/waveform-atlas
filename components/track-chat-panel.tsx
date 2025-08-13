@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
 
 type TrackResult = {
   title: string;
@@ -21,50 +22,7 @@ type TrackResult = {
   duration?: number;
 };
 
-type SpotifyTrack = {
-  id: string;
-  name: string;
-  artists: Array<{ name: string }>;
-  album: SpotifyAlbum;
-  duration_ms: number;
-  external_urls: { spotify: string };
-  preview_url?: string;
-  uri: string;
-  popularity: number;
-  images?: Array<{ url: string }>;
-};
-
-type SpotifyAlbum = {
-  name: string;
-  artists: Array<{ name: string }>;
-  album_type: string;
-  available_markets: Array<string>;
-  external_urls: { spotify: string };
-  href: string;
-  id: string;
-  images: Array<{ url: string }>;
-  is_playable: boolean;
-  release_date: string;
-  release_date_precision: string;
-  total_tracks: number;
-  type: string;
-  uri: string;
-};
-
-type SpotifyArtist = {
-  external_urls: { spotify: string };
-  href: string;
-  id: string;
-  name: string;
-  type: string;
-  uri: string;
-};
-
-type SpotifyImage = {
-  url: string;
-  height: number;
-  width: number;
-};
+import { SpotifyTrack } from "@/types/track"
 
 type TrackSearchRequest = {
   targetBPM: number;
@@ -432,14 +390,16 @@ export default function TrackChatPanel({ onAddTrack }: TrackChatPanelProps) {
                         Found {spotifyMatches.length} Spotify matches:
                       </div>
                       <div className="space-y-1 pb-3">
-                        {spotifyMatches.map((spotifyTrack, matchIdx) => (
+                        {spotifyMatches.map((spotifyTrack) => (
                           <div
                             key={spotifyTrack.id}
                             className="flex items-center justify-between px-3 py-2 hover:bg-white/5"
                           >
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                               {spotifyTrack.images?.[0]?.url ? (
-                                <img
+                                <Image
+                                  width={32}
+                                  height={32}
                                   src={spotifyTrack.images[0].url}
                                   alt="Album cover"
                                   className="w-8 h-8 rounded"
