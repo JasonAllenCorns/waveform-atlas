@@ -31,5 +31,5 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          projectKey: JasonAllenCorns_waveform-atlas
-          organization: ji8jolij-asase3
+          SONAR_PROJECT_KEY: JasonAllenCorns_waveform-atlas
+          SONAR_ORGANIZATION: ji8jolij-asase3
