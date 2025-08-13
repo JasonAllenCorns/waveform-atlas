@@ -1,40 +1,19 @@
-name: SonarCloud Analysis
+name: Build
 on:
   push:
     branches:
       - main
-      - develop
   pull_request:
     types: [opened, synchronize, reopened]
-
 jobs:
-  build:
+  sonarqube:
+    name: SonarQube
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Mandatory to retrieve history for SonarCloud analysis
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20' # Or your preferred Node.js version
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run tests and collect coverage
-        run: npm test -- --coverage # Assuming your package.json has a test script that generates coverage
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: |
-            -Dsonar.projectKey=JasonAllenCorns_waveform-atlas
-            -Dsonar.organization=ji8jolij-asase3
-            -Dsonar.sources=app,components,hooks,lib
-            -Dsonar.tests=.
-            -Dsonar.test.inclusions=**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/*.spec.tsx
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
