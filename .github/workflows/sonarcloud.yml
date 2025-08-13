@@ -25,8 +25,8 @@ jobs:
             -Dsonar.organization=ji8jolij-asase3
             -Dsonar.projectName=waveform-atlas
             -Dsonar.projectVersion=1.0
-            -Dsonar.sources=.
+            -Dsonar.sources=app,components,hooks,lib
             -Dsonar.tests=.
-            -Dsonar.testInclusions='**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/*.spec.tsx'
+            -Dsonar.test.inclusions=**/__tests__/**/*.test.ts,**/__tests__/**/*.test.tsx
             -Dsonar.lcovReportPaths=coverage/lcov.info
             -Dsonar.sourceEncoding=UTF-8
