@@ -1,3 +1,5 @@
+permissions:
+  contents: read
 name: Build
 on:
   push:
@@ -17,3 +19,13 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectKey: JasonAllenCorns_waveform-atlas
+          organization: ji8jolij-asase3
+          projectName: waveform-atlas
+          projectVersion: 1.0
+          sources: .
+          tests: .
+          testInclusions: '**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/*.spec.tsx'
+          lcovReportPaths: coverage/lcov.info
+          sourceEncoding: UTF-8
