@@ -9,7 +9,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "@auth/core": "latest",
     "@dnd-kit/core": "latest",
     "@dnd-kit/sortable": "latest",
     "@dnd-kit/utilities": "latest",
