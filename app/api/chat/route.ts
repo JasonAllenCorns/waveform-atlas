@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     try {
       parsedContent = reply ? JSON.parse(reply) : [];
     } catch (parseError) {
-      console.error('Failed to parse GPT response as JSON:', reply);
+      console.error('Failed to parse GPT response as JSON:', parseError);
       return NextResponse.json({ error: 'Invalid response format from GPT' }, { status: 500 });
     }
 
