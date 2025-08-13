@@ -83,20 +83,6 @@ export function LandingPage() {
           </Card>
         </div>
 
-        {/* Preview Image */}
-        <div className="text-center">
-          <div className="inline-block p-4 bg-brand-light/5 rounded-2xl border border-brand-light/10 backdrop-blur-sm">
-            <Image
-              width={800}
-              height={450}
-              src="/design-mockup.png"
-              alt="Waveform Atlas Interface Preview"
-              className="rounded-lg max-w-full h-auto"
-              style={{ maxHeight: "500px" }}
-            />
-          </div>
-        </div>
-
         {/* Call to Action */}
         <div className="text-center mt-16">
           <h3 className="text-3xl font-bold text-brand-light mb-4">Ready to get started?</h3>
