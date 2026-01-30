@@ -6,6 +6,8 @@ import { Providers } from "./providers"
 
 const inter = Inter({ subsets: ["latin"] })
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: "Waveform Atlas - Spotify Playlist Creator",
   description: "Create and manage Spotify playlists with advanced filtering and drag-and-drop functionality",
